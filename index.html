@@ -1,0 +1,1081 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>არქიმედე — ევრიკას პრინციპი</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Courier+Prime&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #c8a84b;
+    --deep-gold: #8b6914;
+    --cream: #f5f0e8;
+    --dark: #0d0b08;
+    --ink: #1a1510;
+    --stone: #6b5e4a;
+    --water: #2a4a6b;
+    --water-light: #4a7fa8;
+    --rust: #8b3a1a;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--dark);
+    color: var(--cream);
+    font-family: 'Cormorant Garamond', serif;
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* Custom Cursor */
+  .cursor {
+    width: 12px; height: 12px;
+    border: 2px solid var(--gold);
+    border-radius: 50%;
+    position: fixed; pointer-events: none;
+    z-index: 9999;
+    transition: transform 0.15s ease, background 0.15s ease;
+    transform: translate(-50%, -50%);
+  }
+  .cursor-dot {
+    width: 4px; height: 4px;
+    background: var(--gold);
+    border-radius: 50%;
+    position: fixed; pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+  }
+  body:hover .cursor { background: transparent; }
+
+  /* Noise texture overlay */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 1000; opacity: 0.3;
+  }
+
+  /* ─── HERO ─── */
+  #hero {
+    min-height: 100vh;
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
+    position: relative;
+    overflow: hidden;
+    text-align: center;
+    padding: 4rem 2rem;
+  }
+
+  .hero-bg {
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse 80% 60% at 50% 40%, #1a3a5c 0%, #0d0b08 70%);
+  }
+
+  /* Animated ripples */
+  .ripple-container {
+    position: absolute;
+    bottom: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 100%; height: 40%;
+    overflow: hidden;
+  }
+  .ripple {
+    position: absolute;
+    bottom: -50%;
+    left: 50%;
+    transform: translateX(-50%);
+    border-radius: 50%;
+    border: 1px solid rgba(74, 127, 168, 0.3);
+    animation: rippleOut 4s ease-out infinite;
+  }
+  .ripple:nth-child(1) { width: 200px; height: 80px; animation-delay: 0s; }
+  .ripple:nth-child(2) { width: 400px; height: 160px; animation-delay: 0.8s; }
+  .ripple:nth-child(3) { width: 600px; height: 240px; animation-delay: 1.6s; }
+  .ripple:nth-child(4) { width: 800px; height: 320px; animation-delay: 2.4s; }
+  .ripple:nth-child(5) { width: 1000px; height: 400px; animation-delay: 3.2s; }
+
+  @keyframes rippleOut {
+    0% { opacity: 0.8; transform: translateX(-50%) scaleY(1); }
+    100% { opacity: 0; transform: translateX(-50%) scaleY(1.5) scaleX(1.3); }
+  }
+
+  /* Floating particles */
+  .particle {
+    position: absolute;
+    width: 3px; height: 3px;
+    background: var(--gold);
+    border-radius: 50%;
+    animation: floatUp linear infinite;
+    opacity: 0;
+  }
+  @keyframes floatUp {
+    0% { transform: translateY(100vh) translateX(0); opacity: 0; }
+    10% { opacity: 0.6; }
+    90% { opacity: 0.2; }
+    100% { transform: translateY(-20vh) translateX(40px); opacity: 0; }
+  }
+
+  .hero-eyebrow {
+    font-family: 'Courier Prime', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.4em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 2rem;
+    position: relative; z-index: 2;
+    animation: fadeInDown 1s ease both;
+  }
+
+  .hero-title {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: clamp(3rem, 10vw, 7rem);
+    font-weight: 900;
+    line-height: 1;
+    position: relative; z-index: 2;
+    animation: fadeInDown 1s 0.2s ease both;
+    background: linear-gradient(135deg, #e8d5a3 0%, var(--gold) 40%, #c8a84b 60%, #fff8e7 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: none;
+  }
+
+  .hero-subtitle {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: clamp(1rem, 3vw, 1.8rem);
+    font-weight: 700;
+    color: var(--water-light);
+    letter-spacing: 0.15em;
+    margin-top: 0.5rem;
+    position: relative; z-index: 2;
+    animation: fadeInDown 1s 0.4s ease both;
+  }
+
+  .hero-divider {
+    width: 200px; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    margin: 2rem auto;
+    position: relative; z-index: 2;
+    animation: fadeIn 1s 0.6s ease both;
+  }
+
+  .hero-quote {
+    font-style: italic;
+    font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+    font-weight: 300;
+    color: rgba(245,240,232,0.7);
+    max-width: 600px;
+    line-height: 1.6;
+    position: relative; z-index: 2;
+    animation: fadeIn 1s 0.8s ease both;
+  }
+
+  .hero-quote span {
+    color: var(--gold);
+    font-weight: 600;
+    font-style: normal;
+  }
+
+  .scroll-indicator {
+    position: absolute;
+    bottom: 2rem; left: 50%;
+    transform: translateX(-50%);
+    z-index: 2;
+    animation: fadeIn 2s 1.5s ease both;
+    display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
+  }
+  .scroll-indicator span {
+    font-family: 'Courier Prime', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.3em;
+    color: rgba(200,168,75,0.5);
+  }
+  .scroll-line {
+    width: 1px; height: 40px;
+    background: linear-gradient(180deg, var(--gold), transparent);
+    animation: scrollBounce 2s ease-in-out infinite;
+  }
+  @keyframes scrollBounce {
+    0%, 100% { transform: scaleY(1); opacity: 0.5; }
+    50% { transform: scaleY(1.5); opacity: 1; }
+  }
+
+  /* ─── SECTIONS ─── */
+  section {
+    padding: 6rem 2rem;
+    position: relative;
+  }
+
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .section-label {
+    font-family: 'Courier Prime', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.4em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+    display: flex; align-items: center; gap: 1rem;
+  }
+  .section-label::before {
+    content: '';
+    width: 30px; height: 1px;
+    background: var(--gold);
+  }
+
+  .section-title {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: clamp(1.8rem, 5vw, 3.5rem);
+    font-weight: 700;
+    line-height: 1.1;
+    margin-bottom: 2rem;
+    background: linear-gradient(135deg, var(--cream), var(--gold));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  p {
+    font-size: 1.15rem;
+    font-weight: 300;
+    line-height: 1.8;
+    color: rgba(245,240,232,0.8);
+    margin-bottom: 1.5rem;
+  }
+
+  /* ─── BIOGRAPHY ─── */
+  #biography {
+    background: linear-gradient(180deg, var(--dark) 0%, #110e0a 100%);
+  }
+
+  .bio-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6rem;
+    align-items: center;
+  }
+
+  .bio-visual {
+    position: relative;
+  }
+
+  .circle-portrait {
+    width: 320px; height: 320px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #2a3a5a, #0d1520);
+    border: 1px solid rgba(200,168,75,0.3);
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+    margin: 0 auto;
+    overflow: hidden;
+  }
+
+  .circle-portrait::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: conic-gradient(from 0deg, transparent 0%, rgba(200,168,75,0.1) 25%, transparent 50%, rgba(74,127,168,0.1) 75%, transparent 100%);
+    animation: rotateSlow 20s linear infinite;
+  }
+
+  @keyframes rotateSlow {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  .archimedes-svg {
+    width: 180px; height: 180px;
+    opacity: 0.85;
+  }
+
+  .orbit-ring {
+    position: absolute;
+    border-radius: 50%;
+    border: 1px solid rgba(200,168,75,0.2);
+    animation: rotateSlow linear infinite;
+  }
+  .orbit-ring:nth-child(2) { width: 360px; height: 360px; top: 50%; left: 50%; transform: translate(-50%,-50%); animation-duration: 25s; }
+  .orbit-ring:nth-child(3) { width: 420px; height: 420px; top: 50%; left: 50%; transform: translate(-50%,-50%); animation-duration: 35s; animation-direction: reverse; border-color: rgba(74,127,168,0.15); }
+
+  .orbit-dot {
+    width: 6px; height: 6px;
+    background: var(--gold);
+    border-radius: 50%;
+    position: absolute;
+    top: 0; left: 50%;
+    transform: translateX(-50%);
+  }
+
+  /* ─── PRINCIPLE CARDS ─── */
+  #principle {
+    background: #0a0d12;
+    position: relative;
+    overflow: hidden;
+  }
+
+  #principle::before {
+    content: '';
+    position: absolute;
+    top: -200px; left: -200px;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(42,74,107,0.3) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .big-formula {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(2rem, 6vw, 4.5rem);
+    font-weight: 300;
+    font-style: italic;
+    text-align: center;
+    color: var(--cream);
+    margin: 3rem 0;
+    padding: 2rem;
+    position: relative;
+  }
+
+  .big-formula em {
+    color: var(--gold);
+    font-style: normal;
+    font-weight: 600;
+  }
+
+  .big-formula::before, .big-formula::after {
+    content: '';
+    position: absolute;
+    left: 10%; right: 10%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(200,168,75,0.4), transparent);
+  }
+  .big-formula::before { top: 0; }
+  .big-formula::after { bottom: 0; }
+
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin-top: 4rem;
+  }
+
+  .card {
+    background: linear-gradient(135deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+    border: 1px solid rgba(200,168,75,0.15);
+    padding: 2.5rem 2rem;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.3s ease, border-color 0.3s ease;
+    cursor: default;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(200,168,75,0.05), transparent);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .card:hover {
+    transform: translateY(-6px);
+    border-color: rgba(200,168,75,0.4);
+  }
+  .card:hover::before { opacity: 1; }
+
+  .card-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1.5rem;
+    display: block;
+  }
+
+  .card-num {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 4rem;
+    font-weight: 900;
+    position: absolute;
+    top: 1rem; right: 1.5rem;
+    color: rgba(200,168,75,0.08);
+    line-height: 1;
+    pointer-events: none;
+  }
+
+  .card h3 {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--gold);
+    margin-bottom: 1rem;
+    letter-spacing: 0.05em;
+  }
+
+  .card p {
+    font-size: 1rem;
+    margin-bottom: 0;
+    color: rgba(245,240,232,0.7);
+    line-height: 1.7;
+  }
+
+  /* ─── EXPERIMENT ─── */
+  #experiment {
+    background: linear-gradient(180deg, #0a0d12 0%, #0d0b08 100%);
+    position: relative;
+  }
+
+  .experiment-layout {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 5rem;
+    align-items: center;
+  }
+
+  /* Bath animation */
+  .bath-container {
+    position: relative;
+    width: 280px;
+    margin: 0 auto;
+  }
+
+  .bath-svg-wrap {
+    position: relative;
+  }
+
+  .water-fill {
+    animation: waterRise 3s ease-out forwards;
+    transform-origin: bottom;
+  }
+
+  @keyframes waterRise {
+    0% { transform: scaleY(0); }
+    100% { transform: scaleY(1); }
+  }
+
+  .overflow {
+    animation: overflowDrip 3s ease-out 2s forwards;
+    opacity: 0;
+  }
+
+  @keyframes overflowDrip {
+    0% { opacity: 0; transform: translateY(-5px); }
+    100% { opacity: 1; transform: translateY(5px); }
+  }
+
+  /* ─── APPLICATIONS ─── */
+  #applications {
+    background: #080a0d;
+    position: relative;
+  }
+
+  .timeline {
+    position: relative;
+    margin-top: 4rem;
+    padding-left: 3rem;
+  }
+
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 1px;
+    background: linear-gradient(180deg, var(--gold), transparent);
+  }
+
+  .timeline-item {
+    position: relative;
+    margin-bottom: 3rem;
+    opacity: 0;
+    transform: translateX(30px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+
+  .timeline-item.visible {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  .timeline-dot {
+    position: absolute;
+    left: -3.4rem; top: 0.3rem;
+    width: 12px; height: 12px;
+    background: var(--gold);
+    border-radius: 50%;
+    border: 2px solid var(--dark);
+    box-shadow: 0 0 10px var(--gold);
+  }
+
+  .timeline-item h3 {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 1.1rem;
+    color: var(--gold);
+    margin-bottom: 0.5rem;
+  }
+
+  .timeline-item p {
+    font-size: 1rem;
+    margin-bottom: 0;
+  }
+
+  /* ─── INTERACTIVE DEMO ─── */
+  #demo {
+    background: linear-gradient(135deg, #0d0b08 0%, #0a1220 100%);
+    position: relative;
+  }
+
+  .demo-box {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(200,168,75,0.2);
+    padding: 3rem;
+    text-align: center;
+    position: relative;
+  }
+
+  .tank-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 3rem;
+    margin: 2rem 0;
+  }
+
+  .tank {
+    position: relative;
+    width: 160px;
+    height: 200px;
+    border: 2px solid rgba(74,127,168,0.6);
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    overflow: hidden;
+    background: rgba(10,20,40,0.5);
+  }
+
+  .water-level {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    background: linear-gradient(180deg, rgba(100,180,255,0.2), rgba(42,74,107,0.6));
+    transition: height 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    border-top: 2px solid rgba(100,180,255,0.4);
+  }
+
+  .floating-object {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    transition: bottom 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 2rem;
+    line-height: 1;
+    z-index: 2;
+  }
+
+  .demo-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 2rem;
+  }
+
+  .btn {
+    font-family: 'Courier Prime', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    padding: 0.75rem 1.5rem;
+    background: transparent;
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn:hover {
+    background: var(--gold);
+    color: var(--dark);
+  }
+
+  .btn.active {
+    background: var(--gold);
+    color: var(--dark);
+  }
+
+  .demo-info {
+    font-family: 'Courier Prime', monospace;
+    font-size: 0.85rem;
+    color: var(--water-light);
+    margin-top: 1.5rem;
+    min-height: 3rem;
+    line-height: 1.6;
+  }
+
+  /* ─── FOOTER ─── */
+  footer {
+    background: var(--dark);
+    border-top: 1px solid rgba(200,168,75,0.1);
+    padding: 3rem 2rem;
+    text-align: center;
+  }
+
+  footer p {
+    font-size: 0.85rem;
+    color: rgba(245,240,232,0.3);
+    margin-bottom: 0;
+    font-family: 'Courier Prime', monospace;
+    letter-spacing: 0.1em;
+  }
+
+  .footer-logo {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 1.5rem;
+    color: var(--gold);
+    margin-bottom: 1rem;
+    display: block;
+    opacity: 0.6;
+  }
+
+  /* ─── ANIMATIONS ─── */
+  @keyframes fadeInDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ─── NAV ─── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 1.5rem 3rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(180deg, rgba(13,11,8,0.9), transparent);
+    backdrop-filter: blur(10px);
+  }
+
+  .nav-brand {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 1rem;
+    color: var(--gold);
+    text-decoration: none;
+    letter-spacing: 0.1em;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 2rem;
+    list-style: none;
+  }
+
+  .nav-links a {
+    font-family: 'Courier Prime', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(245,240,232,0.5);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--gold); }
+
+  /* Highlight box */
+  .highlight-box {
+    border-left: 3px solid var(--gold);
+    padding: 1.5rem 2rem;
+    background: rgba(200,168,75,0.05);
+    margin: 2rem 0;
+  }
+  .highlight-box p {
+    margin-bottom: 0;
+    font-style: italic;
+    font-size: 1.2rem;
+  }
+
+  @media (max-width: 768px) {
+    .bio-grid, .cards-grid, .experiment-layout {
+      grid-template-columns: 1fr;
+      gap: 3rem;
+    }
+    nav { padding: 1rem 1.5rem; }
+    .nav-links { display: none; }
+    .tank-wrapper { gap: 1.5rem; }
+    .tank { width: 120px; height: 160px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-dot" id="cursorDot"></div>
+
+<!-- NAV -->
+<nav>
+  <a href="#hero" class="nav-brand">არქიმედე</a>
+  <ul class="nav-links">
+    <li><a href="#biography">ცხოვრება</a></li>
+    <li><a href="#principle">პრინციპი</a></li>
+    <li><a href="#experiment">ევრიკა</a></li>
+    <li><a href="#applications">გამოყენება</a></li>
+    <li><a href="#demo">დემო</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-bg"></div>
+
+  <!-- Particles -->
+  <div id="particles"></div>
+
+  <div class="ripple-container">
+    <div class="ripple"></div>
+    <div class="ripple"></div>
+    <div class="ripple"></div>
+    <div class="ripple"></div>
+    <div class="ripple"></div>
+  </div>
+
+  <p class="hero-eyebrow">ძვ. წ. 287 — ძვ. წ. 212 · სირაკუზა, სიცილია</p>
+  <h1 class="hero-title">არქიმედე</h1>
+  <h2 class="hero-subtitle">ევრიკას პრინციპი</h2>
+  <div class="hero-divider"></div>
+  <p class="hero-quote">
+    "ნებისმიერი სხეული, რომელიც მთლიანად ან ნაწილობრივ<br>
+    არის ჩაძირული სითხეში, <span>განიცდის ამომგდებ ძალას, რომელიც ტოლია გადაადგილებული სითხის წონის.</span>"
+  </p>
+
+  <div class="scroll-indicator">
+    <span>გადახვევა</span>
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<!-- BIOGRAPHY -->
+<section id="biography">
+  <div class="container">
+    <div class="bio-grid">
+      <div class="bio-content reveal">
+        <p class="section-label">თავი I</p>
+        <h2 class="section-title">სიძველის<br>უდიდესი გონება</h2>
+        <p>არქიმედე სირაკუზელი დაიბადა სირაკუზის ბერძნულ კოლონიაში დაახლოებით ძვ. წ. 287 წელს. ის იყო მათემატიკოსი, ფიზიკოსი, ინჟინერი, ასტრონომი და გამომგონებელი — ალბათ ანტიკური სამყაროს უდიდესი მეცნიერი.</p>
+        <p>ის სწავლობდა ალექსანდრიაში, ევკლიდეს მიმდევრებთან, სადაც მეგობრობა გაუჩნდა სხვა გამოჩენილ მეცნიერებთან. შემდეგ დაბრუნდა სირაკუზაში და სიცოცხლის ბოლომდე ეწეოდა კვლევასა და გამოგონებებს.</p>
+        <div class="highlight-box">
+          <p>„მომეცით საკმარისად გრძელი ბერკეტი და საყრდენი, და მე დავძრავ მთელ სამყაროს."</p>
+        </div>
+        <p>გარდაიცვალა ძვ. წ. 212 წელს მეორე პუნიური ომის დროს, როდესაც რომაელი ჯარისკაცები შეიჭრნენ სირაკუზაში — ლეგენდის თანახმად, მას მოკლეს მათემატიკური დიაგრამაზე მუშაობის დროს.</p>
+      </div>
+      <div class="bio-visual reveal">
+        <div style="position: relative;">
+          <div class="orbit-ring"><div class="orbit-dot"></div></div>
+          <div class="orbit-ring"></div>
+          <div class="circle-portrait">
+            <!-- Archimedes silhouette SVG -->
+            <svg class="archimedes-svg" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <radialGradient id="glow" cx="50%" cy="30%" r="50%">
+                  <stop offset="0%" stop-color="#c8a84b" stop-opacity="0.4"/>
+                  <stop offset="100%" stop-color="#c8a84b" stop-opacity="0"/>
+                </radialGradient>
+              </defs>
+              <!-- Body silhouette -->
+              <ellipse cx="100" cy="60" rx="28" ry="32" fill="rgba(200,168,75,0.6)"/>
+              <ellipse cx="100" cy="55" rx="22" ry="26" fill="rgba(200,168,75,0.8)"/>
+              <!-- Robe -->
+              <path d="M65 90 Q100 80 135 90 L145 180 Q100 190 55 180 Z" fill="rgba(200,168,75,0.5)"/>
+              <!-- Arms -->
+              <path d="M75 100 Q50 120 45 145" stroke="rgba(200,168,75,0.6)" stroke-width="12" fill="none" stroke-linecap="round"/>
+              <path d="M125 100 Q150 120 155 145" stroke="rgba(200,168,75,0.6)" stroke-width="12" fill="none" stroke-linecap="round"/>
+              <!-- Beard -->
+              <path d="M82 80 Q100 100 118 80" fill="rgba(200,168,75,0.4)"/>
+              <!-- Glow -->
+              <circle cx="100" cy="80" r="80" fill="url(#glow)"/>
+              <!-- Mathematical symbols floating -->
+              <text x="35" y="50" fill="rgba(200,168,75,0.4)" font-size="14" font-style="italic">π</text>
+              <text x="155" y="70" fill="rgba(74,127,168,0.4)" font-size="12">F</text>
+              <text x="30" y="130" fill="rgba(200,168,75,0.3)" font-size="10">∫</text>
+              <text x="160" y="140" fill="rgba(74,127,168,0.3)" font-size="11">ρ</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRINCIPLE -->
+<section id="principle">
+  <div class="container">
+    <div class="reveal">
+      <p class="section-label">თავი II</p>
+      <h2 class="section-title">არქიმედეს<br>პრინციპი</h2>
+    </div>
+    <div class="big-formula reveal">
+      <em>F</em><sub style="color:var(--water-light);font-style:italic">ამომგდები</sub> &nbsp;=&nbsp; <em>ρ</em><sub style="color:var(--water-light);font-style:italic">სითხე</sub> &nbsp;×&nbsp; <em>g</em> &nbsp;×&nbsp; <em>V</em><sub style="color:var(--water-light);font-style:italic">გადაადგილ.</sub>
+    </div>
+    <p class="reveal" style="text-align:center; max-width: 700px; margin: 0 auto 4rem; font-style:italic; font-size:1rem; color: rgba(245,240,232,0.5);">
+      სადაც ρ = სითხის სიმკვრივე, g = გრავიტაციული აჩქარება, V = გადაადგილებული სითხის მოცულობა
+    </p>
+
+    <div class="cards-grid">
+      <div class="card reveal">
+        <span class="card-icon">⚖️</span>
+        <span class="card-num">01</span>
+        <h3>ამომგდები ძალა</h3>
+        <p>სითხეში ჩაძირული ყოველი სხეული განიცდის ამომგდებ ძალას — სითხის მიერ ზემოთ მიმართულ ძალას. ეს ძალა მოქმედებს ამომგდებობის ცენტრში.</p>
+      </div>
+      <div class="card reveal" style="transition-delay: 0.1s">
+        <span class="card-icon">💧</span>
+        <span class="card-num">02</span>
+        <h3>გადაადგილება</h3>
+        <p>ამომგდები ძალის სიდიდე ტოლია სხეულის მიერ გადაადგილებული სითხის წონის. რაც მეტი მოცულობა ჩაძირულია, მით მეტი სითხე გადაადგილდება და მით დიდია ამომგდები ძალა.</p>
+      </div>
+      <div class="card reveal" style="transition-delay: 0.2s">
+        <span class="card-icon">🚢</span>
+        <span class="card-num">03</span>
+        <h3>ტივტივი ან ჩაძირვა</h3>
+        <p>სხეული ტივტივებს, როდესაც მისი საშუალო სიმკვრივე სითხის სიმკვრივეზე ნაკლებია. ჩაიძირება, თუ მეტია. გაჩერდება შუაში, თუ სიმკვრივეები ტოლია.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- EUREKA EXPERIMENT -->
+<section id="experiment">
+  <div class="container">
+    <div class="experiment-layout">
+      <!-- Bath visualization -->
+      <div class="reveal" style="text-align:center;">
+        <svg width="280" height="300" viewBox="0 0 280 300" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="waterGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#4a7fa8" stop-opacity="0.6"/>
+              <stop offset="100%" stop-color="#1a3a5a" stop-opacity="0.9"/>
+            </linearGradient>
+            <linearGradient id="bathGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#3a2a1a"/>
+              <stop offset="100%" stop-color="#2a1a0a"/>
+            </linearGradient>
+            <clipPath id="waterClip">
+              <rect x="40" y="100" width="200" height="160" rx="0"/>
+            </clipPath>
+          </defs>
+
+          <!-- Bath tub -->
+          <path d="M30 110 L30 260 Q30 275 45 275 L235 275 Q250 275 250 260 L250 110 Z" fill="url(#bathGrad)" stroke="rgba(200,168,75,0.4)" stroke-width="2"/>
+          <!-- Bath legs -->
+          <rect x="50" y="275" width="12" height="25" rx="4" fill="rgba(200,168,75,0.3)"/>
+          <rect x="215" y="275" width="12" height="25" rx="4" fill="rgba(200,168,75,0.3)"/>
+
+          <!-- Water fill -->
+          <g clip-path="url(#waterClip)">
+            <rect x="35" y="160" width="210" height="110" fill="url(#waterGrad)" class="water-fill"/>
+            <!-- Water surface ripples -->
+            <ellipse cx="140" cy="160" rx="100" ry="8" fill="rgba(100,180,255,0.2)" class="water-fill"/>
+          </g>
+
+          <!-- Crown (golden) -->
+          <g class="water-fill" style="animation: waterRise 3s ease-out 1.5s forwards; transform-origin: bottom;">
+            <polygon points="140,130 125,150 135,145 140,155 145,145 155,150" fill="var(--gold)" opacity="0.9"/>
+            <!-- crown jewels -->
+            <circle cx="125" cy="145" r="4" fill="#c8a84b"/>
+            <circle cx="140" cy="138" r="4" fill="#e8c86b"/>
+            <circle cx="155" cy="145" r="4" fill="#c8a84b"/>
+          </g>
+
+          <!-- Overflow arrows -->
+          <g class="overflow">
+            <path d="M250 170 Q270 165 275 160" stroke="var(--water-light)" stroke-width="2" fill="none" stroke-dasharray="4,3"/>
+            <path d="M270 158 L275 160 L271 165" fill="var(--water-light)"/>
+          </g>
+
+          <!-- EUREKA text -->
+          <text x="140" y="50" text-anchor="middle" font-family="Cinzel Decorative, serif" font-size="22" fill="var(--gold)" opacity="0" class="overflow" style="animation-delay: 2.5s">
+            ΕὝΡΗΚΑ!
+          </text>
+          <text x="140" y="75" text-anchor="middle" font-family="Courier Prime, monospace" font-size="9" fill="rgba(200,168,75,0.5)" letter-spacing="3" opacity="0" class="overflow" style="animation-delay: 2.8s">
+            ვიპოვე!
+          </text>
+        </svg>
+      </div>
+
+      <!-- Text -->
+      <div class="reveal">
+        <p class="section-label">თავი III</p>
+        <h2 class="section-title">ვიპოვე!<br></h2>
+        <p>ისტორია მოგვითხრობს, რომ სირაკუზის მეფე ჰიერონ II-ს ეჭვი ეპარებოდა, რომ მისი ახლად გაკეთებული გვირგვინი სუფთა ოქროსგან არ იყო — ოქრომჭედელს შეიძლება იაფი ვერცხლი ჰქონდა შერეული. მან არქიმედეს სთხოვა გვირგვინის დაზიანების გარეშე ეპოვა სიმართლე.</p>
+        <p>აბაზანაში შესვლისას არქიმედემ შეამჩნია, რომ წყლის დონე ადიოდა იმ პროპორციით, რამდენადაც ის ჩაიძირებოდა. მიხვდა, რომ შეუძლოდა გაეზომა არარეგულარული ფორმის სხეულის მოცულობა გადაადგილებული წყლის რაოდენობით.</p>
+        <div class="highlight-box">
+          <p>თუ გვირგვინი მეტ წყალს გადაადგილებდა, ვიდრე თანაბარი წონის სუფთა ოქრო, მაშინ იგი ნაკლებად მკვრივ ლითონს — ვერცხლს — შეიცავდა. ოქრომჭედელი თაღლითად გამოაშკარავდა.</p>
+        </div>
+        <p>ლეგენდა გადმოგვცემს, რომ არქიმედე ამ აღმოჩენით იმდენად განათებული იყო, რომ სააბაზანოდან გადმოვარდა და სირაკუზის ქუჩებში შიშველი გარბოდა და ყვიროდა: „ევრიკა! ევრიკა!"</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- APPLICATIONS -->
+<section id="applications">
+  <div class="container">
+    <div class="reveal">
+      <p class="section-label">თავი IV</p>
+      <h2 class="section-title">პრაქტიკული<br>გამოყენება</h2>
+      <p>არქიმედეს პრინციპი მხოლოდ ძველი ისტორია არ არის — ის თანამედროვე ინჟინერიისა და ტექნოლოგიის საფუძველია.</p>
+    </div>
+
+    <div class="timeline">
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <h3>🚢 გემების დიზაინი და საზღვაო არქიტექტურა</h3>
+        <p>ფოლადი წყალზე მკვრივია, მაგრამ გემები ტივტივებენ ღრუ ფორმის გამო. გემის მთლიანი მოცულობა გადაადგილებს წყალს, რომლის წონაც გემის წონაზე მეტია — ეს ქმნის საკმარის ამომგდებ ძალას. თანამედროვე ინჟინრები ამომგდებობას გრამის სიზუსტით ითვლიან.</p>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <h3>🎈 ცხელი ჰაერის ბუშტები და საჰაერო ხომალდები</h3>
+        <p>არქიმედეს პრინციპი გაზებზეც მოქმედებს. ცხელი ჰაერით ან ჰელიუმით სავსე ბუშტი ასეული ატმოსფეროს ჰაერს გადაადგილებს, რომლის წონაც ბუშტისა და მისი შინაარსის წონაზე მეტია — ეს ქმნის ამწევ ძალას.</p>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <h3>🤿 წყალქვეშა ნავების მართვა</h3>
+        <p>წყალქვეშა ნავები სიღრმეს საშუალო სიმკვრივის რეგულირებით აკონტროლებენ. ბალასტის ავზების წყლით შევსება წონას ზრდის; სიკუმპრესო ჰაერით წყლის გამოდევნა ამცირებს. როდესაც საშუალო სიმკვრივე ზღვის წყლის სიმკვრივეს უტოლდება, ნავი ნეიტრალურად ტივტივებს ნებისმიერ სიღრმეზე.</p>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <h3>🔬 ჰიდრომეტრები და სიმკვრივის გაზომვა</h3>
+        <p>ჰიდრომეტრი სითხის სიმკვრივეს პირდაპირ ამომგდებობით ზომავს: ნაკლებად მკვრივ სითხეებში უფრო ღრმად ჩაიძირება, მკვრივებში — ნაკლებად. გამოიყენება ავტომობილის აკუმულატორის მჟავის, რძის ხარისხის, სპირტის შემცველობისა და ნიადაგის მარილიანობის შესამოწმებლად.</p>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <h3>🏊 ადამიანის ცურვა</h3>
+        <p>ადამიანის სხეული უმეტესწილად წყლისგან შედგება, ამიტომ ჩვენ თითქმის ნეიტრალურად ვტივტივებთ. ფილტვების მოცულობა მთავარია — ჩასუნთქვა ზემოთ გვაწეწს, ამოსუნთქვა — ქვემოთ. ამომგდებობის გაგება მოცურავეებსა და მყვინთავებს წყალში პოზიციის სიმარტივით მართვის საშუალებას აძლევს.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- INTERACTIVE DEMO -->
+<section id="demo">
+  <div class="container">
+    <div class="reveal">
+      <p class="section-label">თავი V</p>
+      <h2 class="section-title">ინტერაქტიული<br>დემონსტრაცია</h2>
+      <p>აირჩიეთ საგანი და დააკვირდით ამომგდებობას მოქმედებაში. შეამჩნიეთ, როგორ განსაზღვრავს სიმკვრივე — ტივტივდება თუ ჩაიძირება.</p>
+    </div>
+
+    <div class="demo-box reveal">
+      <div class="tank-wrapper">
+        <div style="text-align:center;">
+          <div class="tank" id="tank">
+            <div class="water-level" id="waterLevel" style="height: 60%;"></div>
+            <div class="floating-object" id="floatingObj" style="bottom: 58%; font-size: 2.5rem;">🪵</div>
+          </div>
+          <p style="font-size: 0.8rem; color: rgba(245,240,232,0.4); margin-top: 0.5rem; font-family: 'Courier Prime'; letter-spacing: 0.1em;">წყლის რეზერვუარი</p>
+        </div>
+      </div>
+
+      <div class="demo-controls">
+        <button class="btn active" onclick="setObject('wood', '🪵', 68, '57%', 'ხე (სიმკვრივე ~0.7 გ/სმ³) წყალზე ნაკლებად მკვრივია. ამომგდები ძალა > წონა → ტივტივებს ზედაპირთან.')">🪵 ხე</button>
+        <button class="btn" onclick="setObject('boat', '⛵', 50, '44%', 'ნავი ღრუა: მისი საშუალო სიმკვრივე წყალზე გაცილებით ნაკლებია. დიდი გადაადგილება → მაღალი ამომგდები ძალა → ტივტივებს.')">⛵ ნავი</button>
+        <button class="btn" onclick="setObject('ice', '🧊', 72, '61%', 'ყინული (სიმკვრივე ~0.92 გ/სმ³) წყალზე ოდნავ ნაკლებად მკვრივია. აისბერგის დაახლოებით 8% ზედაპირზე მოჩანს.')">🧊 ყინული</button>
+        <button class="btn" onclick="setObject('rock', '🪨', 5, '2%', 'კლდე (სიმკვრივე ~2.7 გ/სმ³) წყალზე გაცილებით მკვრივია. წონა >> ამომგდები ძალა → ჩაიძირება ფსკერამდე.')">🪨 კლდე</button>
+        <button class="btn" onclick="setObject('fish', '🐟', 50, '44%', 'თევზები საცურაო ბუშტს იყენებენ — გაზით სავსე ორგანო — საშუალო სიმკვრივის გარემომცველი წყლის სიმკვრივეზე მისასადაგებლად.')">🐟 თევზი</button>
+        <button class="btn" onclick="setObject('sub', '🔵', 50, '44%', 'წყალქვეშა ნავები ბალასტის ავზებში წყალს ტუმბავენ სიმკვრივის შესაცვლელად. ზღვის წყლის ტოლობისას ნეიტრალურად ტივტივებენ ნებისმიერ სიღრმეზე!')">🔵 წყალქვეშა ნავი</button>
+      </div>
+
+      <div class="demo-info" id="demoInfo">
+        აირჩიეთ საგანი ზემოდან, რომ ნახოთ არქიმედეს პრინციპის მოქმედება.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <span class="footer-logo">არქიმედე</span>
+  <p>სასკოლო პროექტი — არქიმედე სირაკუზელის ცხოვრებისა და აღმოჩენების შესახებ</p>
+  <p style="margin-top: 0.5rem;">ძვ. წ. 287 – ძვ. წ. 212 &nbsp;·&nbsp; „ნუ შეაშფოთებ ჩემს წრეებს"</p>
+</footer>
+
+<script>
+  // Custom cursor
+  const cursor = document.getElementById('cursor');
+  const cursorDot = document.getElementById('cursorDot');
+  document.addEventListener('mousemove', (e) => {
+    cursor.style.left = e.clientX + 'px';
+    cursor.style.top = e.clientY + 'px';
+    cursorDot.style.left = e.clientX + 'px';
+    cursorDot.style.top = e.clientY + 'px';
+  });
+
+  // Particles
+  const particleContainer = document.getElementById('particles');
+  for (let i = 0; i < 20; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    p.style.left = Math.random() * 100 + '%';
+    p.style.animationDuration = (6 + Math.random() * 10) + 's';
+    p.style.animationDelay = (Math.random() * 8) + 's';
+    p.style.width = p.style.height = (1 + Math.random() * 3) + 'px';
+    particleContainer.appendChild(p);
+  }
+
+  // Intersection Observer for reveal animations
+  const reveals = document.querySelectorAll('.reveal');
+  const timelineItems = document.querySelectorAll('.timeline-item');
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.1 });
+
+  reveals.forEach(el => observer.observe(el));
+  timelineItems.forEach(el => observer.observe(el));
+
+  // Interactive demo
+  function setObject(type, emoji, floatHeight, waterPercent, info) {
+    const obj = document.getElementById('floatingObj');
+    const water = document.getElementById('waterLevel');
+    const infoEl = document.getElementById('demoInfo');
+
+    obj.textContent = emoji;
+
+    if (type === 'rock') {
+      obj.style.bottom = '2%';
+      obj.style.fontSize = '2rem';
+    } else if (type === 'fish' || type === 'sub') {
+      water.style.height = '60%';
+      obj.style.bottom = '38%';
+      obj.style.fontSize = '2rem';
+    } else {
+      water.style.height = waterPercent;
+      obj.style.bottom = floatHeight + '%';
+      obj.style.fontSize = '2.5rem';
+    }
+
+    infoEl.textContent = '▶ ' + info;
+
+    // Update button states
+    document.querySelectorAll('.btn').forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
+  }
+</script>
+</body>
+</html>
